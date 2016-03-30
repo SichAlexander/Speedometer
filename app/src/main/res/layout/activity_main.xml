@@ -15,12 +15,10 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:background="#ffffff"
-        gauge:showOuterShadow="false"
-        gauge:showOuterRim="false"
-        gauge:showInnerRim="false"
         gauge:needleWidth="0.010"
         gauge:needleHeight="0.40"
         gauge:scaleStartValue="0"
+        gauge:textUnit="MPH"
         gauge:scaleEndValue="60"
         android:layout_marginTop="30dp"
         />

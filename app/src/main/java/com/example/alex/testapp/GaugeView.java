@@ -31,43 +31,35 @@ import android.widget.TextView;
 
 public class GaugeView extends View {
 
+    protected final String SUPER_STATE              = "superState";
+    protected final String NEEDLE_INITIALIZED       = "needleInitialized";
+    protected final String NEEDLE_VELOCITY          = "needleVelocity";
+    protected final String NEEDLE_ACCELERATION      = "needleAcceleration";
+    protected final String NEEDLE_LAST_MOVED        = "needleLastMoved";
+    protected final String NEEDLE_CURRENT_VALUE     = "currentValue";
+    protected final String NEEDLE_TARGET_VALUE      = "targetValue";
+
     public static final int SIZE = 300;
     public static final float TOP = 0.0f;
     public static final float LEFT = 0.0f;
     public static final float RIGHT = 1.0f;
     public static final float BOTTOM = 1.0f;
     public static final float CENTER = 0.5f;
-    public static final boolean SHOW_OUTER_SHADOW = true;
     public static final boolean SHOW_OUTER_BORDER = true;
-    public static final boolean SHOW_OUTER_RIM = true;
-    public static final boolean SHOW_INNER_RIM = true;
     public static final boolean SHOW_NEEDLE = true;
     public static final boolean SHOW_SCALE = false;
     public static final boolean SHOW_RANGES = true;
-    public static final boolean SHOW_TEXT = false;
 
-    public static final float OUTER_SHADOW_WIDTH = 0.03f;
-    public static final float OUTER_BORDER_WIDTH = 0.04f;
-    public static final float OUTER_RIM_WIDTH = 0.05f;
-    public static final float INNER_RIM_WIDTH = 0.06f;
-    public static final float INNER_RIM_BORDER_WIDTH = 0.005f;
+    public static final float OUTER_BORDER_WIDTH = 0.06f;
 
     public static final float NEEDLE_WIDTH = 0.025f;
     public static final float NEEDLE_HEIGHT = 0.32f;
-    public static final int INNER_CIRCLE_COLOR = Color.rgb(190, 215, 123);
-    public static final int OUTER_CIRCLE_COLOR = Color.rgb(205, 231, 132);
-
-
     public static final float SCALE_POSITION = 0.015f;
     public static final float SCALE_START_VALUE = 0.0f;
     public static final float SCALE_END_VALUE = 100.0f;
     public static final float SCALE_START_ANGLE = 60.0f;
-    public static final int SCALE_DIVISIONS = 10;
+    public static final int SCALE_DIVISIONS = 5;
     public static final int SCALE_SUBDIVISIONS = 5;
-
-    public static final int[] OUTER_SHADOW_COLORS = {Color.argb(40, 255, 254, 187), Color.argb(20, 255, 247, 219),
-            Color.argb(5, 255, 255, 255)};
-    public static final float[] OUTER_SHADOW_POS = {0.90f, 0.95f, 0.99f};
 
     public static final float[] RANGE_VALUES = {16.0f, 25.0f, 40.0f, 100.0f};
     public static final int[] RANGE_COLORS = {Color.rgb(0, 0, 0), Color.rgb(0, 0, 0), Color.rgb(0, 0, 0),
@@ -75,9 +67,9 @@ public class GaugeView extends View {
 
     public static final int TEXT_SHADOW_COLOR = Color.argb(100, 0, 0, 0);
     public static final int TEXT_VALUE_COLOR = Color.WHITE;
-    public static final int TEXT_UNIT_COLOR = Color.WHITE;
-    public static final float TEXT_VALUE_SIZE = 0.3f;
-    public static final float TEXT_UNIT_SIZE = 0.1f;
+    public static final int TEXT_UNIT_COLOR = Color.GREEN;
+    public static final float TEXT_VALUE_SIZE = 0.12f;
+    public static final float TEXT_UNIT_SIZE = 0.12f;
     public static final float TEXT_OFFSET_Y = 20f;
 
 
@@ -85,24 +77,17 @@ public class GaugeView extends View {
     // Customizable properties
     // *--------------------------------------------------------------------- *//
 
-    private boolean mShowOuterShadow;
     private boolean mShowOuterBorder;
-    private boolean mShowOuterRim;
-    private boolean mShowInnerRim;
+
     private boolean mShowScale;
     private boolean mShowRanges;
     private boolean mShowNeedle;
     private boolean mShowText = true;
 
-    private float mOuterShadowWidth;
     private float mOuterBorderWidth;
-    private float mOuterRimWidth;
-    private float mInnerRimWidth;
-    private float mInnerRimBorderWidth;
     private float mNeedleWidth;
     private float mNeedleHeight;
-    private int mInnerCircleColor;
-    private int mOuterCircleColor;
+
 
     private float mScalePosition;
     private float mScaleStartValue;
@@ -117,27 +102,22 @@ public class GaugeView extends View {
     private RectF mOuterShadowRect;
     private RectF mOuterBorderRect;
     private RectF mOuterRimRect;
-    private RectF mInnerRimRect;
-    private RectF mInnerRimBorderRect;
+
     private RectF mFaceRect;
     private RectF mScaleRect;
 
     private Bitmap mBackground;
     private Paint mBackgroundPaint;
-    private Paint mOuterShadowPaint;
+
     private Paint mOuterBorderPaint;
-    private Paint mOuterRimPaint;
-    private Paint mInnerRimPaint;
-    private Paint mInnerRimBorderLightPaint;
-    private Paint mInnerRimBorderDarkPaint;
+
     private Paint mFacePaint;
-    private Paint mFaceBorderPaint;
-    private Paint mFaceShadowPaint;
+
     private Paint[] mRangePaints;
-    private Paint mNeedleRightPaint;
+
     private Paint mNeedleLeftPaint;
     private Paint mNeedleScrewPaint;
-    private Paint mNeedleScrewBorderPaint;
+
     private Paint mTextValuePaint;
     private Paint mTextUnitPaint;
 
@@ -183,25 +163,17 @@ public class GaugeView extends View {
 
     private void readAttrs(final Context context, final AttributeSet attrs, final int defStyle) {
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GaugeView, defStyle, 0);
-        mShowOuterShadow = a.getBoolean(R.styleable.GaugeView_showOuterShadow, SHOW_OUTER_SHADOW);
         mShowOuterBorder = a.getBoolean(R.styleable.GaugeView_showOuterBorder, SHOW_OUTER_BORDER);
-        mShowOuterRim = a.getBoolean(R.styleable.GaugeView_showOuterRim, SHOW_OUTER_RIM);
-        mShowInnerRim = a.getBoolean(R.styleable.GaugeView_showInnerRim, SHOW_INNER_RIM);
+
         mShowNeedle = a.getBoolean(R.styleable.GaugeView_showNeedle, SHOW_NEEDLE);
         mShowScale = a.getBoolean(R.styleable.GaugeView_showScale, SHOW_SCALE);
         mShowRanges = a.getBoolean(R.styleable.GaugeView_showRanges, SHOW_RANGES);
-//        mShowText = a.getBoolean(R.styleable.GaugeView_showText, SHOW_TEXT);
 
-        mOuterShadowWidth = mShowOuterShadow ? a.getFloat(R.styleable.GaugeView_outerShadowWidth, OUTER_SHADOW_WIDTH) : 0.0f;
         mOuterBorderWidth = mShowOuterBorder ? a.getFloat(R.styleable.GaugeView_outerBorderWidth, OUTER_BORDER_WIDTH) : 0.0f;
-        mOuterRimWidth = mShowOuterRim ? a.getFloat(R.styleable.GaugeView_outerRimWidth, OUTER_RIM_WIDTH) : 0.0f;
-        mInnerRimWidth = mShowInnerRim ? a.getFloat(R.styleable.GaugeView_innerRimWidth, INNER_RIM_WIDTH) : 0.0f;
-        mInnerRimBorderWidth = mShowInnerRim ? a.getFloat(R.styleable.GaugeView_innerRimBorderWidth, INNER_RIM_BORDER_WIDTH) : 0.0f;
+
 
         mNeedleWidth = a.getFloat(R.styleable.GaugeView_needleWidth, NEEDLE_WIDTH);
         mNeedleHeight = a.getFloat(R.styleable.GaugeView_needleHeight, NEEDLE_HEIGHT);
-        mInnerCircleColor = a.getColor(R.styleable.GaugeView_innerCircleColor, INNER_CIRCLE_COLOR);
-        mOuterCircleColor = a.getColor(R.styleable.GaugeView_outerCircleColor, OUTER_CIRCLE_COLOR);
 
 
         mScalePosition = (mShowScale || mShowRanges) ? a.getFloat(R.styleable.GaugeView_scalePosition, SCALE_POSITION) : 0.0f;
@@ -260,19 +232,10 @@ public class GaugeView extends View {
         }
     }
 
-    @TargetApi(11)
     private void init() {
-        // TODO Why isn't this working with HA layer?
-        // The needle is not displayed although the onDraw() is being triggered by invalidate()
-        // calls.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
-
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         initDrawingRects();
         initDrawingTools();
-
-        // Compute the scale properties
         if (mShowRanges) {
             initScale();
         }
@@ -284,20 +247,14 @@ public class GaugeView extends View {
         // Note that on Canvas X axis points to right, while the Y axis points downwards.
         mOuterShadowRect = new RectF(LEFT, TOP, RIGHT, BOTTOM);
 
-        mOuterBorderRect = new RectF(mOuterShadowRect.left + mOuterShadowWidth, mOuterShadowRect.top + mOuterShadowWidth,
-                mOuterShadowRect.right - mOuterShadowWidth, mOuterShadowRect.bottom - mOuterShadowWidth);
+        mOuterBorderRect = new RectF(mOuterShadowRect.left + OUTER_BORDER_WIDTH/2 , mOuterShadowRect.top + OUTER_BORDER_WIDTH/2,
+                mOuterShadowRect.right - OUTER_BORDER_WIDTH/2 , mOuterShadowRect.bottom - OUTER_BORDER_WIDTH/2);
 
         mOuterRimRect = new RectF(mOuterBorderRect.left + mOuterBorderWidth, mOuterBorderRect.top + mOuterBorderWidth,
                 mOuterBorderRect.right - mOuterBorderWidth, mOuterBorderRect.bottom - mOuterBorderWidth);
 
-        mInnerRimRect = new RectF(mOuterRimRect.left + mOuterRimWidth, mOuterRimRect.top + mOuterRimWidth, mOuterRimRect.right
-                - mOuterRimWidth, mOuterRimRect.bottom - mOuterRimWidth);
-
-        mInnerRimBorderRect = new RectF(mInnerRimRect.left + mInnerRimBorderWidth, mInnerRimRect.top + mInnerRimBorderWidth,
-                mInnerRimRect.right - mInnerRimBorderWidth, mInnerRimRect.bottom - mInnerRimBorderWidth);
-
-        mFaceRect = new RectF(mInnerRimRect.left + mInnerRimWidth, mInnerRimRect.top + mInnerRimWidth,
-                mInnerRimRect.right - mInnerRimWidth, mInnerRimRect.bottom - mInnerRimWidth);
+        mFaceRect = new RectF(mOuterRimRect.left , mOuterRimRect.top ,
+                mOuterRimRect.right , mOuterRimRect.bottom );
 
         mScaleRect = new RectF(mFaceRect.left + mScalePosition, mFaceRect.top + mScalePosition, mFaceRect.right - mScalePosition,
                 mFaceRect.bottom - mScalePosition);
@@ -307,47 +264,28 @@ public class GaugeView extends View {
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setFilterBitmap(true);
 
-        if (mShowOuterShadow) {
-            mOuterShadowPaint = getDefaultOuterShadowPaint();
-        }
         if (mShowOuterBorder) {
             mOuterBorderPaint = getDefaultOuterBorderPaint();
         }
-        if (mShowOuterRim) {
-            mOuterRimPaint = getDefaultOuterRimPaint();
-        }
-        if (mShowInnerRim) {
-            mInnerRimPaint = getDefaultInnerRimPaint();
-            mInnerRimBorderLightPaint = getDefaultInnerRimBorderLightPaint();
-            mInnerRimBorderDarkPaint = getDefaultInnerRimBorderDarkPaint();
-        }
+
         if (mShowRanges) {
             setDefaultScaleRangePaints();
         }
         if (mShowNeedle) {
             setDefaultNeedlePaths();
             mNeedleLeftPaint = getDefaultNeedleLeftPaint();
-            mNeedleRightPaint = getDefaultNeedleRightPaint();
             mNeedleScrewPaint = getDefaultNeedleScrewPaint();
-            mNeedleScrewBorderPaint = getDefaultNeedleScrewBorderPaint();
         }
-        if (mShowText) {
+//        if (mShowText) {
             mTextValuePaint = getDefaultTextValuePaint();
             mTextUnitPaint = getDefaultTextUnitPaint();
-        }
+//        }
 
         mFacePaint = getDefaultFacePaint();
-        mFaceBorderPaint = getDefaultFaceBorderPaint();
-        mFaceShadowPaint = getDefaultFaceShadowPaint();
+
     }
 
-    public Paint getDefaultOuterShadowPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setShader(new RadialGradient(CENTER, CENTER, mOuterShadowRect.width() / 2.0f, OUTER_SHADOW_COLORS, OUTER_SHADOW_POS,
-                TileMode.MIRROR));
-        return paint;
-    }
+
 
     private Paint getDefaultOuterBorderPaint() {
         final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -356,48 +294,6 @@ public class GaugeView extends View {
         return paint;
     }
 
-    public Paint getDefaultOuterRimPaint() {
-        // Use a linear gradient to create the 3D effect
-        final LinearGradient verticalGradient = new LinearGradient(mOuterRimRect.left, mOuterRimRect.top, mOuterRimRect.left,
-                mOuterRimRect.bottom, Color.rgb(255, 255, 255), Color.rgb(84, 90, 100), TileMode.REPEAT);
-
-        // Use a Bitmap shader for the metallic style
-        final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.light_alu);
-        final BitmapShader aluminiumTile = new BitmapShader(bitmap, TileMode.REPEAT, TileMode.REPEAT);
-        final Matrix matrix = new Matrix();
-        matrix.setScale(1.0f / bitmap.getWidth(), 1.0f / bitmap.getHeight());
-        aluminiumTile.setLocalMatrix(matrix);
-
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setShader(new ComposeShader(verticalGradient, aluminiumTile, PorterDuff.Mode.MULTIPLY));
-        paint.setFilterBitmap(true);
-        return paint;
-    }
-
-    private Paint getDefaultInnerRimPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setShader(new LinearGradient(mInnerRimRect.left, mInnerRimRect.top, mInnerRimRect.left, mInnerRimRect.bottom, new int[]{
-                Color.argb(255, 68, 73, 80), Color.argb(255, 91, 97, 105), Color.argb(255, 178, 180, 183), Color.argb(255, 188, 188, 190),
-                Color.argb(255, 84, 90, 100), Color.argb(255, 137, 137, 137)}, new float[]{0, 0.1f, 0.2f, 0.4f, 0.8f, 1},
-                TileMode.CLAMP));
-        return paint;
-    }
-
-    private Paint getDefaultInnerRimBorderLightPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.argb(100, 255, 255, 255));
-        paint.setStrokeWidth(0.005f);
-        return paint;
-    }
-
-    private Paint getDefaultInnerRimBorderDarkPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.argb(100, 81, 84, 89));
-        paint.setStrokeWidth(0.005f);
-        return paint;
-    }
 
     public Paint getDefaultFacePaint() {
         final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -405,21 +301,6 @@ public class GaugeView extends View {
         return paint;
     }
 
-    public Paint getDefaultFaceBorderPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.rgb(255, 255, 255));
-        paint.setStrokeWidth(0f);
-        return paint;
-    }
-
-    public Paint getDefaultFaceShadowPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setShader(new RadialGradient(0.5f, 0.5f, mFaceRect.width() / 2.0f, new int[]{Color.argb(60, 40, 96, 170),
-                Color.argb(80, 15, 34, 98), Color.argb(120, 0, 0, 0), Color.argb(140, 0, 0, 0)},
-                new float[]{0.60f, 0.85f, 0.96f, 0.99f}, TileMode.MIRROR));
-        return paint;
-    }
 
     public void setDefaultNeedlePaths() {
         final float x = 0.5f, y = 0.5f;
@@ -444,32 +325,11 @@ public class GaugeView extends View {
         return paint;
     }
 
-    public Paint getDefaultNeedleRightPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.rgb(0, 0, 0));
-        //paint.setShadowLayer(0.01f, 0.005f, -0.005f, Color.argb(127, 0, 0, 0));
-        return paint;
-    }
 
     public Paint getDefaultNeedleScrewPaint() {
         final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        //paint.setShader(new RadialGradient(0.5f, 0.5f, 0.07f, new int[]{Color.rgb(171, 171, 171), Color.WHITE}, new float[]{0.05f,
-        //        0.9f}, TileMode.MIRROR));
         paint.setColor(Color.rgb(0, 0, 0));
         return paint;
-    }
-
-    public Paint getDefaultNeedleScrewBorderPaint() {
-        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.argb(100, 81, 84, 89));
-        paint.setStrokeWidth(0.005f);
-        return paint;
-    }
-
-    public void setDefaultRanges() {
-        mRangeValues = new float[]{16, 25, 40, 100};
-        mRangeColors = new int[]{Color.rgb(231, 32, 43), Color.rgb(232, 111, 33), Color.rgb(232, 231, 33), Color.rgb(27, 202, 33)};
     }
 
     public void setDefaultScaleRangePaints() {
@@ -489,7 +349,7 @@ public class GaugeView extends View {
 
     public Paint getDefaultTextValuePaint() {
         final Paint paint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(mTextValueColor);
+        paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(0.005f);
         paint.setTextSize(mTextValueSize);
@@ -501,7 +361,7 @@ public class GaugeView extends View {
 
     public Paint getDefaultTextUnitPaint() {
         final Paint paint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(mTextUnitColor);
+        paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(0.005f);
         paint.setTextSize(mTextUnitSize);
@@ -513,15 +373,15 @@ public class GaugeView extends View {
     @Override
     protected void onRestoreInstanceState(final Parcelable state) {
         final Bundle bundle = (Bundle) state;
-        final Parcelable superState = bundle.getParcelable("superState");
+        final Parcelable superState = bundle.getParcelable(SUPER_STATE);
         super.onRestoreInstanceState(superState);
 
-        mNeedleInitialized = bundle.getBoolean("needleInitialized");
-        mNeedleVelocity = bundle.getFloat("needleVelocity");
-        mNeedleAcceleration = bundle.getFloat("needleAcceleration");
-        mNeedleLastMoved = bundle.getLong("needleLastMoved");
-        mCurrentValue = bundle.getFloat("currentValue");
-        mTargetValue = bundle.getFloat("targetValue");
+        mNeedleInitialized = bundle.getBoolean(NEEDLE_INITIALIZED);
+        mNeedleVelocity = bundle.getFloat(NEEDLE_VELOCITY);
+        mNeedleAcceleration = bundle.getFloat(NEEDLE_ACCELERATION);
+        mNeedleLastMoved = bundle.getLong(NEEDLE_LAST_MOVED);
+        mCurrentValue = bundle.getFloat(NEEDLE_CURRENT_VALUE);
+        mTargetValue = bundle.getFloat(NEEDLE_TARGET_VALUE);
     }
 
     private void initScale() {
@@ -537,15 +397,16 @@ public class GaugeView extends View {
         final Parcelable superState = super.onSaveInstanceState();
 
         final Bundle state = new Bundle();
-        state.putParcelable("superState", superState);
-        state.putBoolean("needleInitialized", mNeedleInitialized);
-        state.putFloat("needleVelocity", mNeedleVelocity);
-        state.putFloat("needleAcceleration", mNeedleAcceleration);
-        state.putLong("needleLastMoved", mNeedleLastMoved);
-        state.putFloat("currentValue", mCurrentValue);
-        state.putFloat("targetValue", mTargetValue);
+        state.putParcelable(SUPER_STATE, superState);
+        state.putBoolean(NEEDLE_INITIALIZED, mNeedleInitialized);
+        state.putFloat(NEEDLE_VELOCITY, mNeedleVelocity);
+        state.putFloat(NEEDLE_ACCELERATION, mNeedleAcceleration);
+        state.putLong(NEEDLE_LAST_MOVED, mNeedleLastMoved);
+        state.putFloat(NEEDLE_CURRENT_VALUE, mCurrentValue);
+        state.putFloat(NEEDLE_TARGET_VALUE, mTargetValue);
         return state;
     }
+
 
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
@@ -596,8 +457,8 @@ public class GaugeView extends View {
         canvas.translate((scale == getHeight()) ? ((getWidth() - scale) / 2) / scale : 0
                 , (scale == getWidth()) ? ((getHeight() - scale) / 2) / scale : 0);
 
-        //drawRim(canvas);
-        //drawFace(canvas);
+        drawRim(canvas);
+        drawFace(canvas);
 
         if (mShowRanges) {
             drawScale(canvas);
@@ -631,29 +492,19 @@ public class GaugeView extends View {
     }
 
     private void drawRim(final Canvas canvas) {
-        if (mShowOuterShadow) {
-            canvas.drawOval(mOuterShadowRect, mOuterShadowPaint);
-        }
-        if (mShowOuterBorder) {
-            canvas.drawOval(mOuterBorderRect, mOuterBorderPaint);
-        }
-        if (mShowOuterRim) {
-            canvas.drawOval(mOuterRimRect, mOuterRimPaint);
-        }
-        if (mShowInnerRim) {
-            canvas.drawOval(mInnerRimRect, mInnerRimPaint);
-            canvas.drawOval(mInnerRimRect, mInnerRimBorderLightPaint);
-            canvas.drawOval(mInnerRimBorderRect, mInnerRimBorderDarkPaint);
-        }
+        Path path = new Path();
+        path.addArc(mOuterBorderRect,130, 280);
+        mOuterBorderPaint.setColor(Color.BLACK);
+        mOuterBorderPaint.setStyle(Paint.Style.STROKE);
+        mOuterBorderPaint.setStrokeWidth(OUTER_BORDER_WIDTH);
+        canvas.drawPath(path, mOuterBorderPaint);
     }
 
     private void drawFace(final Canvas canvas) {
         // Draw the face gradient
-        canvas.drawOval(mFaceRect, mFacePaint);
-        // Draw the face border
-        //canvas.drawOval(mFaceRect, mFaceBorderPaint);
-        // Draw the inner face shadow
-        //canvas.drawOval(mFaceRect, mFaceShadowPaint);
+        mFacePaint.setColor(Color.WHITE);
+//        canvas.drawArc(mFaceRect, 130, 280, false, mFacePaint);
+
     }
 
     private void drawText(final Canvas canvas) {
@@ -664,15 +515,15 @@ public class GaugeView extends View {
         final float startX = CENTER - textUnitWidth / 2;
         final float startY = CENTER + 0.1f;
 
-        drawText(canvas,textValue, startX, startY, mTextValuePaint);
-
-        if (!TextUtils.isEmpty(mTextUnit)) {
-            canvas.drawText(mTextUnit, CENTER + textValueWidth / 2 + 0.03f, CENTER, mTextUnitPaint);
-        }
+        drawText(canvas,textValue, CENTER, startY, mTextValuePaint);
+//        mTextUnit = "MHP";
+//        if (!TextUtils.isEmpty(mTextUnit)) {
+            drawText(canvas,mTextUnit, CENTER , startY + 0.12f, mTextValuePaint);
+//        }
     }
 
     private void drawScale(final Canvas canvas) {
-        canvas.save(Canvas.MATRIX_SAVE_FLAG);
+        canvas.save();
         // On canvas, North is 0 degrees, East is 90 degrees, South is 180 etc.
         // We start the scale somewhere South-West so we need to first rotate the canvas.
         canvas.rotate(mScaleRotation, 0.5f, 0.5f);
@@ -683,7 +534,6 @@ public class GaugeView extends View {
             final float y1 = mScaleRect.top;
             Log.d("mScaleRect.top: ", String.valueOf(mScaleRect.top));
 
-            final float y2 = y1 + 0.045f; // height of division
             final float y3 = y1 + 0.090f; // height of subdivision
 
             final float value = getValueForTick(i);
@@ -696,23 +546,14 @@ public class GaugeView extends View {
                 paint.setStrokeWidth(0.01f);
                 paint.setColor(Color.rgb(87,97,114));
                 canvas.drawLine(0.5f, y1 - 0.015f, 0.5f, y3 - 0.03f, paint);
-                // Draw the text 0.15 away from the division tick
-                //paint.setTextSize(1F);
-                paint.setStyle(Paint.Style.FILL);
-//                canvas.drawText(valueString(value), 0.49f, y3 + 0.05f, paint);
-//                drawText(canvas, valueString(value), 0.5f, y3 + 0.05f, paint);
                 Log.d("TEXT:",valueString(value));
-            } else {
-                // Draw a subdivision tick
-                paint.setStrokeWidth(0.002f);
-                paint.setColor(Color.rgb(209,209,209));
-                canvas.drawLine(0.5f, y1, 0.5f, y2, paint);
             }
             canvas.rotate(mSubdivisionAngle, 0.5f, 0.5f);
             Log.d("mSubdivisionAngle: ", String.valueOf(mSubdivisionAngle));
         }
         canvas.restore();
     }
+
 
     private void drawText(Canvas canvas, String value, float x, float y, Paint paint)
     {
@@ -731,43 +572,13 @@ public class GaugeView extends View {
 
         canvas.drawText(value, x*magnifier, (y * magnifier) + TEXT_OFFSET_Y,paint );
 
-        //canvas.drawTextOnPath(value, textPath, 0.0f, 0.0f, paint);
+//        canvas.drawTextOnPath(value, textPath, 0.0f, 0.0f, paint);
 
         // bring everything back to normal
         canvas.restore();
         paint.setTextSize(originalTextSize);
     }
 
-    /**
-     * Draws a text in the canvas with spacing between each letter.
-     * Basically what this method does is it split's the given text into individual letters
-     * and draws each letter independently using Canvas.drawText with a separation of
-     * {@code spacingX} between each letter.
-     * @param canvas the canvas where the text will be drawn
-     * @param text the text what will be drawn
-     * @param left the left position of the text
-     * @param top the top position of the text
-     * @param paint holds styling information for the text
-     * @param spacingPx the number of pixels between each letter that will be drawn
-     */
-    public static void drawSpacedText(Canvas canvas, String text, float left, float top, Paint paint, float spacingPx){
-
-        float currentLeft = left;
-
-        for (int i = 0; i < text.length(); i++) {
-            String c = text.charAt(i)+"";
-            canvas.drawText(c, currentLeft, top, paint);
-            currentLeft += spacingPx;
-            currentLeft += paint.measureText(c);
-        }
-    }
-
-    /**
-     * returns the width of a text drawn by drawSpacedText
-     */
-    public static float getSpacedTextWidth(Paint paint, String text, float spacingX){
-        return paint.measureText(text) + spacingX * ( text.length() - 1 );
-    }
 
     private String valueString(final float value) {
         return String.format("%d", (int) value);
@@ -789,45 +600,12 @@ public class GaugeView extends View {
     private void drawNeedle(final Canvas canvas) {
         if (mNeedleInitialized) {
             final float angle = getAngleForValue(mCurrentValue);
-            // Logger.log.info(String.format("value=%f -> angle=%f", mCurrentValue, angle));
-
-            canvas.save(Canvas.MATRIX_SAVE_FLAG);
+            canvas.save();
             canvas.rotate(angle, 0.5f, 0.5f);
-
-            Paint outerCircle =  new Paint();
-            outerCircle.setColor(mOuterCircleColor);
-            outerCircle.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(0.5f, 0.5f, 0.23f, outerCircle);
-
-            Paint innerCircle =  new Paint();
-            innerCircle.setColor(mInnerCircleColor);
-            canvas.drawCircle(0.5f, 0.5f, 0.1f, innerCircle);
-
-            setNeedleShadowPosition(angle);
             canvas.drawPath(mNeedleLeftPath, mNeedleLeftPaint);
-            canvas.drawPath(mNeedleRightPath, mNeedleRightPaint);
-
             canvas.restore();
+            canvas.drawCircle(0.5f, 0.5f, 0.025f, mNeedleScrewPaint);
 
-            // Draw the needle screw and its border
-
-
-            canvas.drawCircle(0.5f, 0.5f, 0.04f, mNeedleScrewPaint);
-
-            Log.d("NEEDLE", "Needle drawn :/");
-            //canvas.drawCircle(0.5f, 0.5f, 0.04f, mNeedleScrewBorderPaint);
-        }
-    }
-
-    private void setNeedleShadowPosition(final float angle) {
-        if (angle > 180 && angle < 360) {
-            // Move shadow from right to left
-            mNeedleRightPaint.setShadowLayer(0, 0, 0, Color.BLACK);
-            mNeedleLeftPaint.setShadowLayer(0.01f, -0.005f, 0.005f, Color.argb(127, 0, 0, 0));
-        } else {
-            // Move shadow from left to right
-            mNeedleLeftPaint.setShadowLayer(0, 0, 0, Color.BLACK);
-            mNeedleRightPaint.setShadowLayer(0.01f, 0.005f, -0.005f, Color.argb(127, 0, 0, 0));
         }
     }
 
@@ -836,13 +614,9 @@ public class GaugeView extends View {
     }
 
     private void computeCurrentValue() {
-        // Logger.log.warn(String.format("velocity=%f, acceleration=%f", mNeedleVelocity,
-        // mNeedleAcceleration));
-
         if (!(Math.abs(mCurrentValue - mTargetValue) > 0.01f)) {
             return;
         }
-
         if (-1 != mNeedleLastMoved) {
             final float time = (System.currentTimeMillis() - mNeedleLastMoved) / 1000.0f;
             final float direction = Math.signum(mNeedleVelocity);
