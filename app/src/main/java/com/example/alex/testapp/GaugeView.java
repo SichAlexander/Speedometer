@@ -1,33 +1,22 @@
 package com.example.alex.testapp;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ComposeShader;
-import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 public class GaugeView extends View {
 
@@ -119,7 +108,6 @@ public class GaugeView extends View {
     private Paint mNeedleScrewPaint;
 
     private Paint mTextValuePaint;
-    private Paint mTextUnitPaint;
 
     private String mTextValue;
     private String mTextUnit;
@@ -276,10 +264,9 @@ public class GaugeView extends View {
             mNeedleLeftPaint = getDefaultNeedleLeftPaint();
             mNeedleScrewPaint = getDefaultNeedleScrewPaint();
         }
-//        if (mShowText) {
+        if (mShowText) {
             mTextValuePaint = getDefaultTextValuePaint();
-            mTextUnitPaint = getDefaultTextUnitPaint();
-//        }
+        }
 
         mFacePaint = getDefaultFacePaint();
 
@@ -509,17 +496,13 @@ public class GaugeView extends View {
 
     private void drawText(final Canvas canvas) {
         final String textValue = !TextUtils.isEmpty(mTextValue) ? mTextValue : valueString(mCurrentValue);
-        final float textValueWidth = mTextValuePaint.measureText(textValue);
-        final float textUnitWidth = !TextUtils.isEmpty(mTextUnit) ? mTextUnitPaint.measureText(mTextUnit) : 0;
 
-        final float startX = CENTER - textUnitWidth / 2;
         final float startY = CENTER + 0.1f;
 
         drawText(canvas,textValue, CENTER, startY, mTextValuePaint);
-//        mTextUnit = "MHP";
-//        if (!TextUtils.isEmpty(mTextUnit)) {
+        if (!TextUtils.isEmpty(mTextUnit)) {
             drawText(canvas,mTextUnit, CENTER , startY + 0.12f, mTextValuePaint);
-//        }
+        }
     }
 
     private void drawScale(final Canvas canvas) {
